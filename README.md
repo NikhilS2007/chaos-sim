@@ -25,36 +25,47 @@ This project:
 ```powershell
 git clone https://github.com/NikhilS2007/chaos-sim.git
 cd chaos-sim
+```
 
-### 2. Python venv + dependencies
+### 2. Set up Python venv & install dependencies
+```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+```
 
-### 3. Start the stack
+### 3. Start the Docker stack
+```powershell
 docker compose up -d --build
+```
 
 Check status:
-
+```powershell
 docker compose ps
+```
 
-### 4. Run the chaos tools (separate terminals)\
+### 4. Run the chaos tools (in separate terminals)
 
-Chaos Monkey (injects failurs every 20s):
-
+**Chaos Monkey** (injects failures every 20s):
+```powershell
 python .\scripts\chaos_monkey.py --interval 20 --modes kill pause restart --project chaos-sim
+```
 
-Monitor (logs health to CSV)
-
+**Monitor** (logs health to CSV):
+```powershell
 python .\scripts\monitor.py --interval 5 --project chaos-sim
+```
 
-Auto-Recovery (restarts unhealthy/exited services):
-
+**Auto-Recovery** (restarts unhealthy/exited services):
+```powershell
 python .\scripts\recover.py --project chaos-sim
-
+```
 
 ### 5. Verify it works
-
+```powershell
 curl http://localhost:5000/health
-
-Expected: {"status":"ok"}
+```
+Expected output:
+```json
+{"status":"ok"}
+```
