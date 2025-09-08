@@ -1,0 +1,42 @@
+﻿version: "3.8"
+
+x-health-defaults: &health_defaults
+  interval: 5s
+  timeout: 3s
+  retries: 5
+
+services:
+  api:
+    build: ./services/api
+    container_name: chaos_api
+    environment:
+      - FLASK_ENV=production
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  worker:
+    build: ./services/worker
+    container_name: chaos_worker
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      - API_URL=http://api:5000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os,sys; sys.exit(0)"]
+      <<: *health_defaults
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: chaos_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      <<: *health_defaults
+    restart: unless-stopped
